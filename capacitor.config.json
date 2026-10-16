@@ -1,0 +1,20 @@
+{
+  "appId": "com.marcos.cardapioketo",
+  "appName": "Cardápio Keto",
+  "webDir": "www",
+  "backgroundColor": "#040506",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#040506",
+    "scheme": "Cardápio Keto"
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "iconColor": "#ff6363"
+    },
+    "SplashScreen": {
+      "launchAutoHide": true,
+      "backgroundColor": "#040506"
+    }
+  }
+}

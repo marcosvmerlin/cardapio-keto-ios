@@ -1,0 +1,57 @@
+name: Gerar IPA (iOS, sem assinatura)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Sincronizar projeto iOS (copia www e instala pods)
+        run: npx cap sync ios
+
+      - name: Compilar sem assinatura
+        working-directory: ios/App
+        run: |
+          xcodebuild \
+            -workspace App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM="" \
+            -quiet build
+
+      - name: Empacotar o .ipa
+        working-directory: ios/App
+        run: |
+          rm -rf Payload && mkdir Payload
+          cp -R "build/Build/Products/Release-iphoneos/App.app" Payload/
+          zip -qr "Cardapio-Keto.ipa" Payload
+          ls -la Cardapio-Keto.ipa
+
+      - name: Publicar o .ipa como artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Cardapio-Keto-ipa
+          path: ios/App/Cardapio-Keto.ipa
+          if-no-files-found: error
+          retention-days: 30
